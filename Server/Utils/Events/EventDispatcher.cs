@@ -92,7 +92,7 @@ namespace Times.Server.Utils.Events
                     handler.DynamicInvoke(new Object[] { Event }.Concat(args).ToArray());
                 } else
                 {
-                    handler.Invoke(Event);
+                    handler.Invoke(new Object[] { Event }.Concat(args).ToArray());
                 }
                     
                 _loc3_ = _loc3_ + 1;

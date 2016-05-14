@@ -12,13 +12,21 @@ using System.Xml.Serialization;
 namespace Times.Server.net
 {
     using Utils;
+    using Log;
 
     class Connection : Socket
     {
+        const string XT_EVENT = "onXTReceivedE";
+        const string XML_EVENT = "onXMLReceivedE";
+        const string ERROR_EVENT = "onErroredE";
+        const string INFO_EVENT = "onInfoE";
+        const string WARN_EVENT = "onWarnE";
 
         public bool ServerOpen = false;
         private ManualResetEvent Server = new ManualResetEvent(false);
         public List<Socket> Sockets = new List<Socket> { };
+
+        public static bool Debug = true;
 
         public string SERVER_MESSAGE_DELIMITER = "%";
         public Dictionary<string, dynamic> MessageHandlers = new Dictionary<string, object> { };
@@ -92,6 +100,7 @@ namespace Times.Server.net
                     try { _loc3_.Close(); } catch (Exception) { };
 
                     if (this.Sockets.Contains(_loc3_)) this.Sockets.Remove(_loc3_);
+                    Debugger.CallEvent(INFO_EVENT, "Penguin Disconnected!");
 
                 }
 
@@ -125,12 +134,28 @@ namespace Times.Server.net
         {
             if (Data.ElementAt(0).ToString() == this.SERVER_MESSAGE_DELIMITER)
             {
-                try { this.StrReceived(Penguin, Data); } catch { };
+                try
+                {
+                    Debugger.CallEvent(XT_EVENT, Data);
+                    this.StrReceived(Penguin, Data);
+                }
+                catch (Exception err)
+                {
+                    Debugger.CallEvent(ERROR_EVENT, "Error while parsing XT Packet : " + err);
+                };
 
             }
             else if (Data.ElementAt(0).ToString() == "<")
             {
-                try { this.XMLReceived(Penguin, Data); } catch { };
+                try
+                {
+                    Debugger.CallEvent(XML_EVENT, Data);
+                    this.XMLReceived(Penguin, Data);
+                }
+                catch (Exception err)
+                {
+                    Debugger.CallEvent(ERROR_EVENT, "Error while parsing XML Packet : " + err);
+                };
             }
         }
 

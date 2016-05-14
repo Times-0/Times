@@ -242,7 +242,6 @@ namespace Times.Server.net
         public List<Object> Penguins;
 
         public string MessageDelimiter = "%";
-        public bool debug = true;
         public Dictionary<Object, List<string>> SendCommandBuffers = new Dictionary<object, List<string>> { };
 
         protected Connection server;

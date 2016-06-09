@@ -1,16 +1,17 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
-using System.Windows.Forms;
 
 namespace Times.Server.Utils.Events
 {
     class EventDelegate
     {
+
+        public delegate void _loc2_(params Object[] _locx_);
 
         public EventDelegate()
         {

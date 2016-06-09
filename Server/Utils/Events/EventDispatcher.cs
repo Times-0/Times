@@ -1,10 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Dynamic;
-using System.Windows.Forms;
 
 namespace Times.Server.Utils.Events
 {
@@ -92,7 +91,7 @@ namespace Times.Server.Utils.Events
                     handler.DynamicInvoke(new Object[] { Event }.Concat(args).ToArray());
                 } else
                 {
-                    handler.Invoke(new Object[] { Event }.Concat(args).ToArray());
+                    handler.Invoke(Event);
                 }
                     
                 _loc3_ = _loc3_ + 1;

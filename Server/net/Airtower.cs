@@ -11,9 +11,28 @@ using System.Xml.Linq;
 
 namespace Times.Server.net
 {
-    using Server.Utils;
+    using Utils;
+    using Utils.Events;
     using Server;
-    
+
+    class AirtowerEvent : EventDispatcher
+    {
+        public AirtowerEvent(dynamic Airtower)
+        {
+            this.initialize(Airtower);
+        }
+
+        new protected void initialize(dynamic Obj)
+        {
+            Obj.addEventListener = EventDelegate.create(this, "addEventListener");
+            Obj.addListener = EventDelegate.create(this, "addEventListener");
+            Obj.removeEventListener = EventDelegate.create(this, "removeEventListener");
+            Obj.removeListener = EventDelegate.create(this, "removeEventListener");
+            Obj.dispatchEvent = EventDelegate.create(this, "dispatchEvent");
+            Obj.updateListeners = EventDelegate.create(this, "updateListeners");
+        }
+    }
+
     class Airtower : IAirtower
     {
         /* LOG CONSTANTS */
@@ -71,6 +90,7 @@ namespace Times.Server.net
             Log.Debugger.CallEvent(INFO_EVENT, signature);
 
             __airtower__O = this;
+            new AirtowerEvent(__airtower__O);
         }
 
         public void startConnection()

@@ -53,7 +53,8 @@ namespace Times.Client
                 {
                     Server.Log.Debugger.CallEvent(Server.net.Airtower.ERROR_EVENT, "Unable to load dependency : \n" + Excep.InnerException.ToString());
                     Server.Log.Debugger.CallEvent(Server.net.Airtower.WARN_EVENT, "Server exited!");
-                    
+                    Console.Write("Press any key to exit...");
+                    Console.Read();
                     Environment.Exit(0);
                 }
             }

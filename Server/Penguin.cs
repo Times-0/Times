@@ -114,6 +114,7 @@ namespace Times.Server
                         if (parse == Packets.InvalidPacket)
                         {
                             // Better to remove that penguin
+                            Console.WriteLine("Incorrect Packet : " + _loc1_);
                             Airtower.disposeClient(false, this.socket);
                             break;
                         }
@@ -121,10 +122,14 @@ namespace Times.Server
                         // handle packets acc to received, if xt or xml
                         if (parse == Packets.XT_DATA)
                         {
+                            Packets.HandleXTPacket(this);
                             Log.Debugger.CallEvent(Airtower.XT_EVENT, _loc1_);
                         } else 
                         if (parse == Packets.XML_DATA)
                         {
+                            if (_loc1_ == "<policy-file-request/>")
+                                return;
+                            Packets.HandleXMLPacket(this);
                             Log.Debugger.CallEvent(Airtower.XML_EVENT, _loc1_);
                         }
                     }

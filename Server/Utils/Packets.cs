@@ -4,9 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using System.Xml.Linq;
+using XmlToDynamic;
 
 namespace Times.Server.Utils
 {
+    using net;
+
     static class Packets
     {
         public const int InvalidPacket = -1;
@@ -36,11 +40,13 @@ namespace Times.Server.Utils
                     return XML_DATA;
                 try
                 {
-                    dynObj.clientData = (Dynamic)new XmlSerializer(typeof(Dynamic)).Deserialize(data.GetStream());
+                    var Xelement = XElement.Parse(data);
+                    dynObj.clientData = Xelement.ToDynamic();
 
                     return XML_DATA;
                 } catch (Exception exc)
                 {
+                    Console.WriteLine("Error : " + exc.ToString());
                     return InvalidPacket;
                 }
             }
@@ -74,8 +80,22 @@ namespace Times.Server.Utils
                     vars.Add(peng.clientData[i]);
                 }
 
-                var callbackHandlerName = String.Format("{0}/{1}/", category, handler);
+                var callbackHandlerName = String.Format("#xt{0}-{1}/", category, handler);
+                Airtower.getCurrentAirtower().updateListeners(callbackHandlerName, new { client = peng }, vars.ToArray());
+            }
+            catch (Exception) { }
+        }
 
+        public static void HandleXMLPacket(Penguin peng)
+        {
+            try
+            {
+                if (peng.clientData == null)
+                    return;
+                
+
+                var callbackHandlerName = String.Format("#xt{0}-{1}/", category, handler);
+                Airtower.getCurrentAirtower().updateListeners(callbackHandlerName, new { client = peng }, vars.ToArray());
             }
             catch (Exception) { }
         }

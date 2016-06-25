@@ -59,7 +59,7 @@ namespace Times.Server.Utils
             return stream;
         }
         
-        public static Dynamic ToDynamic<T>(this List<T> @list)
+        /*public static Dynamic ToDynamic<T>(this List<T> @list)
         {
             Dynamic _loc1_ = new Dynamic();
 
@@ -72,6 +72,6 @@ namespace Times.Server.Utils
             }
 
             return _loc1_;
-        }
+        }*/
     }
 }

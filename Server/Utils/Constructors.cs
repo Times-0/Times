@@ -178,7 +178,7 @@ namespace Times.Server.Utils
         }
     }
 
-    abstract class IAirtower
+    abstract class IAirtower : Dynamic
     {
         /* AIRTOWER PACKET */
         public static string SERVER_MESSAGE_DELIMITER = "%";

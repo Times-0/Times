@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="../../js/jQuery.min.js"></script>
+
+	<script type="text/javascript" src="../../js/base.min.js"></script>
+	<script type="text/javascript" src="../../js/project.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="../../css/base.min.css">
+	<link rel="stylesheet" type="text/css" href="../../css/project.min.css">
+
+	<title>Times :: Configuration</title>
+</head>
+<body class="page-brand">
+	<header class="header header-transparent header-waterfall ui-header">
+		<ul class="nav nav-list pull-left">
+			<li>
+				<a data-toggle="menu" href="#ui_menu">
+					<span class="icon icon-lg">menu</span>
+				</a>
+			</li>
+		</ul>
+		<a class="header-logo header-affix-hide margin-left-no margin-right-no" data-offset-top="213" data-spy="affix" href="../../index.html"><b>Times</b>&nbsp; : &nbsp;<i> Docs</i></a>
+		<span class="header-logo header-affix margin-left-no margin-right-no" data-offset-top="213" data-spy="affix">
+			<ul class="breadcrumb">
+			    <li>
+			        <a> Times </a>
+			    </li>
+			    <li>
+			        <a href="../../index.html"> Docs </a>
+			    </li>
+			    <li>
+			        <a> Server handlers </a>
+			    </li>
+			    <li class="active">
+			        <a> Configuration</a>
+			    </li>
+			</ul>
+		</span>
+	</header>
+	<nav aria-hidden="true" class="menu" id="ui_menu" tabindex="-1">
+		<div class="menu-scroll">
+			<div class="menu-content">
+				<a class="menu-logo" href="#">Times</a>
+				<ul class="nav">
+					<li>
+						<a class="waves-attach" href="index.html">Docs - Home</a>
+					</li>
+					<li>
+						<a class="collapsed waves-attach" data-toggle="collapse" href="#times_api">API</a>
+						<ul class="menu-collapse collapse" id="times_api">
+							<li>
+								<a class="waves-attach" href="#">Coming Soon!</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	<main class="content">
+		<div class="content-header ui-content-header">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2">
+						<h1 class="content-heading">Configuartion</h1>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2">
+					<section class="content-inner margin-top-no">
+						<div class="card">
+							<div class="card-main">
+								<div class="card-inner">
+									<p>This will brief you on how to configure the <b>server details</b> <i>like IP/Port and listening address</i>. And how to activate them.</p>
+								</div>
+							</div>
+						</div>
+
+						<div class="card">
+							<div class="card-main">
+								<div class="card-inner">
+									<p>You can find these configurations in <ul class="breadcrumb">
+										    <li>
+										        <a href="https://github.com/Times-0/Times"> Times </a>
+										    </li>
+										    <li>
+										        <a href="https://github.com/Times-0/Times/tree/master/Server/"> Server </a>
+										    </li>
+										    <li>
+										        <a href="https://github.com/Times-0/Times/tree/master/Server/net"> net </a>
+										    </li>
+										    <li >
+										        <a href="https://github.com/Times-0/Times/blob/master/Server/net/Airtower.cs"> Airtower.cs</a>
+										    </li>
+										</ul>
+										<br>
+										The details IP, port and server name is saved as variable which can be changed and accessed both in-and-out the class. The variables are:
+
+										<div class="table-responsive">
+											<table class="table" title="Vars">
+												<thead>
+													<tr>
+														<th>Variable</th>
+														<th>Type of variable</th>
+														<th>Variable Description</th>
+													</tr>
+												</thead>
+												<tbody>
+													<tr>
+														<td><b>IP</b></td>
+														<td><i>String</i></td>
+														<td>IP Adress to listen for incoming clients.</td>
+													</tr>
+													<tr>
+														<td><b>PORT</b></td>
+														<td><i>Integer</i></td>
+														<td>Port to listen with correesponding to IP.</td>
+													</tr>
+													<tr>
+														<td><b>NAME</b></td>
+														<td><i>String</i></td>
+														<td>Name of te server (Optional)</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+										<br>
+										Below is an example of configuring server, by initiating the Airtower class.
+										<br>
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #0000ff">using</span> System;
+<span style="color: #0000ff">using</span> System.Collections.Generic;
+<span style="color: #0000ff">using</span> System.Linq;
+<span style="color: #0000ff">using</span> System.Text;
+<span style="color: #008000">// Times</span>
+<span style="color: #0000ff">using</span> Server.Utils.Events;
+<span style="color: #0000ff">using</span> Server.net;
+<span style="color: #0000ff">using</span> Server.Log;
+<span style="color: #0000ff">using</span> Client;
+
+<span style="color: #0000ff">public</span> <span style="color: #0000ff">class</span> <span style="color: #2b91af">TestServer</span>
+{
+   <span style="color: #0000ff">public</span> <span style="color: #0000ff">static</span> <span style="color: #0000ff">void</span> Main()
+   {
+      Airtower loginServer = <span style="color: #0000ff">new</span> Airtower(<span style="color: #a31515">&quot;127.0.0.1&quot;</span>, 6112); <span style="color: #008000">// You can auto-config here</span>
+      loginServer.IP = <span style="color: #a31515">&quot;new IP&quot;</span>;
+      loginServer.Name = <span style="color: #a31515">&quot;Times Test v2&quot;</span>; <span style="color: #008000">// You can access and edit it out-the class too!</span>
+   }
+}
+</pre></td></tr></table></div>
+
+
+
+									</p>
+								</div>
+							</div>
+						</div>
+						<center>
+						<h3>Next move on to <a href="Running.html">Running the server</a></h3>
+						</center>
+					</section>
+				</div>
+			</div>
+		</div>								
+	</main>
+	<div class="stepper-horiz stepper-horiz-alt">
+									<div class="stepper-horiz-inner">
+										<div class="stepper done">
+											<div class="stepper-step">
+												<i class="icon stepper-step-icon">check</i>
+												<span class="stepper-step-num">1</span>
+											</div>
+											<span class="stepper-text">Server</span>
+										</div>
+										<div class="stepper active">
+											<div class="stepper-step">
+												<i class="icon stepper-step-icon">check</i>
+												<span class="stepper-step-num">1</span>
+											</div>
+											<span class="stepper-text">
+												Configuration<br>
+												<!--small class="stepper-text-sub text-black-hint">Optional</small-->
+											</span>
+										</div>
+										<div class="stepper">
+											<div class="stepper-step">
+												<i class="icon stepper-step-icon">check</i>
+												<span class="stepper-step-num">2</span>
+											</div>
+											<span class="stepper-text"><a href="Running.html">Running the server</a></span>
+										</div>
+										<div class="stepper">
+											<div class="stepper-step">
+												<i class="icon stepper-step-icon">check</i>
+												<span class="stepper-step-num">3</span>
+											</div>
+											<span class="stepper-text"><a>Accepting clients</a></span>
+										</div>
+										<div class="stepper">
+											<div class="stepper-step">
+												<i class="icon stepper-step-icon">check</i>
+												<span class="stepper-step-num">4</span>
+											</div>
+											<span class="stepper-text"><a>Attaching client to custom class</a></span>
+										</div>
+										<div class="stepper">
+											<div class="stepper-step">
+												<i class="icon stepper-step-icon">check</i>
+												<span class="stepper-step-num">5</span>
+											</div>
+											<span class="stepper-text"><a>Extending penguin-socket class</a></span>
+											<small class="stepper-text-sub text-black-hint">Coming soon!</small>
+										</div>
+									</div>
+								</div>
+	<footer class="ui-footer">
+		<div class="container">
+			<p>Times - Docs</p>
+		</div>
+	</footer>
+</body>
+</html>

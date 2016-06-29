@@ -10,18 +10,146 @@
 
 	<title>Times Docs</title>
 </head>
-<body>
-	<nav>
-	<center>
-		<ul class="nav nav-list">
-		    <li>
-		        <a> Home </a>
-		    </li>
-		    <li>
-		        <a> Docs </a>
-		    </li>
+<body class="page-brand">
+	<header class="header header-transparent header-waterfall ui-header">
+		<ul class="nav nav-list pull-left">
+			<li>
+				<a data-toggle="menu" href="#ui_menu">
+					<span class="icon icon-lg">menu</span>
+				</a>
+			</li>
 		</ul>
-	</center>
+		<a class="header-logo header-affix-hide margin-left-no margin-right-no" data-offset-top="213" data-spy="affix" href="index.html"><b>Times</b>&nbsp; : &nbsp;<i> Docs</i></a>
+		<span class="header-logo header-affix margin-left-no margin-right-no" data-offset-top="213" data-spy="affix">Docs</span>
+	</header>
+	<nav aria-hidden="true" class="menu" id="ui_menu" tabindex="-1">
+		<div class="menu-scroll">
+			<div class="menu-content">
+				<a class="menu-logo" href="index.html">Material</a>
+				<ul class="nav">
+					<li>
+						<a class="waves-attach" href="index.html">Docs - Home</a>
+					</li>
+					<li>
+						<a class="collapsed waves-attach" data-toggle="collapse" href="#times_api">API</a>
+						<ul class="menu-collapse collapse" id="times_api">
+							<li>
+								<a class="waves-attach" href="#">Coming Soon!</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</div>
 	</nav>
+	<main class="content">
+		<div class="content-header ui-content-header">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2">
+						<h1 class="content-heading">About Docs</h1>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2">
+					<section class="content-inner margin-top-no">
+						<div class="card">
+							<div class="card-main">
+								<div class="card-inner">
+									<p>This docs gives you a brief view of <i>Times protocol and API</i>. This gives you a detail explanation and description of each and every function and API of <i>Times</i></p>
+								</div>
+							</div>
+						</div>
+						<h2 class="content-sub-heading">CONTENTS</h2>
+						<div class="card">
+							<div class="card-main">
+								<div class="card-inner">
+									<ul>
+									<li><a class="btn btn-flat" role="button" data-toggle="collapse" href="#selector1"> Server handler </a>
+									<div class="collapse collapsible-region" id="selector1"> 
+										<div class="stpper-vert">
+										    <div class="stpper-vert-inner">
+										        <div class="stepper done">
+										            <div class="stepper-step">
+										                <i class="icon stepper-step-icon">check</i>
+										                <span class="stepper-step-num">#1</span>
+										            </div>
+										            <span class="stepper-text"><a href="docs/server/Configuration.html">Configuration</a></span>
+										        </div>
+										        <div class="stepper done">
+										            <div class="stepper-step">
+										                <i class="icon stepper-step-icon">check</i>
+										                <span class="stepper-step-num">#2</span>
+										            </div>
+										            <span class="stepper-text"><a href="#">Running the server</a></span>
+										        </div>
+										        <div class="stepper done">
+										            <div class="stepper-step">
+										                <i class="icon stepper-step-icon">check</i>
+										                <span class="stepper-step-num">#3</span>
+										            </div>
+										            <span class="stepper-text"><a href="#">Accepting clients</a></span>
+										        </div>
+										        <div class="stepper done">
+										            <div class="stepper-step">
+										                <i class="icon stepper-step-icon">check</i>
+										                <span class="stepper-step-num">#4</span>
+										            </div>
+										            <span class="stepper-text"><a href="#">Attaching client to custom class</a></span>
+										        </div>
+										        <div class="stepper">
+										            <div class="stepper-step">
+										                <i class="icon stepper-step-icon">check</i>
+										                <span class="stepper-step-num">#5</span>
+										            </div>
+										            <span class="stepper-text"><a href="#">Extending penguin-socket class</a></span>
+										        </div>
+										        <div class="stepper-vert-content">
+										           Will be available soon.
+										        </div>
+										    </div>
+										</div>
+									</div></li>
+									<li><a class="btn btn-flat" role="button" data-toggle="collapse" href="#selector2"> Client handler </a>
+									<div class="collapse collapsible-region" id="selector2"> 
+										<div class="stpper-vert">
+										    <div class="stpper-vert-inner">
+										        <div class="stepper done">
+										            <div class="stepper-step">
+										                <i class="icon stepper-step-icon">check</i>
+										                <span class="stepper-step-num">#1</span>
+										            </div>
+										            <span class="stepper-text"><a href="#">Client details</a></span>
+										        </div>
+										        <div class="stepper done">
+										            <div class="stepper-step">
+										                <i class="icon stepper-step-icon">check</i>
+										                <span class="stepper-step-num">#2</span>
+										            </div>
+										            <span class="stepper-text"><a href="#">Client handlers</a></span>
+										            <div class="stepper-vert-content">
+           												<p>Treated as Plugins or Dependencies, loaded at runtime dynamically.</p>
+											        </div>
+										        </div>
+										    </div>
+										</div>
+									</div></li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</div>
+	</main>
+	<footer class="ui-footer">
+		<div class="container">
+			<p>Times - Docs</p>
+		</div>
+	</footer>
 </body>
 </html>

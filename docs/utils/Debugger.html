@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="../../js/jQuery.min.js"></script>
+
+	<script type="text/javascript" src="../../js/base.min.js"></script>
+	<script type="text/javascript" src="../../js/project.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="../../css/base.min.css">
+	<link rel="stylesheet" type="text/css" href="../../css/project.min.css">
+
+	<title>Times :: Debugger</title>
+</head>
+<body class="page-brand">
+	<header class="header header-transparent header-waterfall ui-header">
+		<ul class="nav nav-list pull-left">
+			<li>
+				<a data-toggle="menu" href="#ui_menu">
+					<span class="icon icon-lg">menu</span>
+				</a>
+			</li>
+		</ul>
+		<a class="header-logo header-affix-hide margin-left-no margin-right-no" data-offset-top="213" data-spy="affix" href="../../index.html"><b>Times</b>&nbsp; : &nbsp;<i> Docs</i></a>
+		<span class="header-logo header-affix margin-left-no margin-right-no" data-offset-top="213" data-spy="affix">
+			<ul class="breadcrumb">
+			    <li>
+			        <a> Times </a>
+			    </li>
+			    <li>
+			        <a href="../../index.html"> Docs </a>
+			    </li>
+			    <li>
+			        <a> Utilities </a>
+			    </li>
+			    <li class="active">
+			        <a>Debugger</a>
+			    </li>
+			</ul>
+		</span>
+	</header>
+	<nav aria-hidden="true" class="menu" id="ui_menu" tabindex="-1">
+		<div class="menu-scroll">
+			<div class="menu-content">
+				<a class="menu-logo" href="#">Times</a>
+				<ul class="nav">
+					<li>
+						<a class="waves-attach" href="index.html">Docs - Home</a>
+					</li>
+					<li>
+						<a class="collapsed waves-attach" data-toggle="collapse" href="#times_api">API</a>
+						<ul class="menu-collapse collapse" id="times_api">
+							<li>
+								<a class="waves-attach" href="#">Coming Soon!</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	<main class="content">
+		<div class="content-header ui-content-header">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2">
+						<h1 class="content-heading">Debugger</h1>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-6 col-lg-offset-3 col-md-8 col-md-offset-2">
+					<section class="content-inner margin-top-no">
+						<div class="card">
+							<div class="card-main">
+								<div class="card-inner">
+									<p>This will tell you about <b>Times Debugger</b> and about <i>using debugger</i></p>
+								</div>
+							</div>
+						</div>
+
+						<div class="card">
+							<div class="card-main">
+								<div class="card-inner">
+									<p>You can find the debug class in <ul class="breadcrumb">
+										    <li>
+										        <a href="https://github.com/Times-0/Times"> Times </a>
+										    </li>
+										    <li>
+										        <a href="https://github.com/Times-0/Times/tree/master/Server/"> Server </a>
+										    </li>
+										    <li>
+										        <a href="https://github.com/Times-0/Times/tree/master/Server/Log"> Log </a>
+										    </li>
+										    <li >
+										        <a href="https://github.com/Times-0/Times/blob/master/Server/net/Debugger.cs"> Debugger.cs</a>
+										    </li>
+										</ul>
+										This debugger is unique in it's way. It's similar to the <a>event dispatcher</a> class. It has no direct contact with Airtower or any of the server, but is a static class which dynamically handles the callbacks. You can add as many as debug callbacks and as many as callback handlers. All you neet to do is, know how it works and implement one then attach it to the server.
+										<br><br>
+										You'll see that in brief below.
+										<br><br>
+										The <a>Debugger.cs</a> have 3 methods, <i>CallEvent, removeLogEvent, and addLogEvent</i> respectively.
+										<table class="table" title="Vars">
+											<thead>
+												<tr>
+													<th>Method</th>
+													<th>Arguments</th>
+													<th>Description</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td><b>CallEvent</b></td>
+													<td>Event [String], args [Params]</td>
+													<td>If there exist a callback for the <b>Event</b>, it will be executed. The parameters sent will be dynamic and is the same as <b>args</b>. Ie, <b>args</b> are sent as parameters/arguments.</td>
+												</tr>
+												<tr>
+													<td><b>addLogEvent</b></td>
+													<td>Event [String], method [Delegate]</td>
+													<td>If there exist a Event, it will add the delegate to it. If not present it will create and then add it to it.</td>
+												</tr>
+												<tr>
+													<td><b>removeLogEvent</b></td>
+													<td>Event [String], method [Delegate]</td>
+													<td>First it will check if Event exist. If it does, it will check if delegate is in the list, if it is in there, it will delete it from the list. Else returns.</td>
+												</tr>
+											</tbody>
+										</table>
+										<br>
+										Below is an example code, in console-based C# Project, to use/activate Airtower's Debugging event. You can further read about <a>Event Delegate</a> used in here in later topics.
+										<br>
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #0000ff">using</span> System;
+<span style="color: #0000ff">using</span> System.Collections.Generic;
+<span style="color: #0000ff">using</span> System.Linq;
+<span style="color: #0000ff">using</span> System.Text;
+<span style="color: #008000">// Times</span>
+<span style="color: #0000ff">using</span> Server.Utils.Events;
+<span style="color: #0000ff">using</span> Server.net;
+<span style="color: #0000ff">using</span> Server.Log;
+<span style="color: #0000ff">using</span> Client;
+
+<span style="color: #0000ff">public</span> <span style="color: #0000ff">class</span> <span style="color: #2b91af">TestServer</span>
+{
+   <span style="color: #0000ff">public</span> <span style="color: #0000ff">static</span> <span style="color: #0000ff">void</span> Main()
+   {
+      <span style="color: #008000">// Initiate the Debugger class or activate the class</span>
+      inititate();
+      Airtower loginServer = <span style="color: #0000ff">new</span> Airtower(<span style="color: #a31515">&quot;127.0.0.1&quot;</span>, 6112); <span style="color: #008000">// You can auto-config here</span>
+      loginServer.IP = <span style="color: #a31515">&quot;new IP&quot;</span>;
+      loginServer.Name = <span style="color: #a31515">&quot;Times Test v2&quot;</span>; <span style="color: #008000">// You can access and edit it out-the class too!</span>
+
+      <span style="color: #008000">// Run the server</span>
+      loginServer.startConnection();
+   }
+   
+  <span style="color: #0000ff">public</span> <span style="color: #0000ff">static</span> <span style="color: #0000ff">void</span> inititate()
+    {
+       Times times = <span style="color: #0000ff">new</span> Times();
+       Debugger.addLogEvent(Connection.XT_EVENT, EventDelegate.create(times, <span style="color: #a31515">&quot;XTReceived&quot;</span>));
+       Debugger.addLogEvent(Connection.XML_EVENT, EventDelegate.create(times, <span style="color: #a31515">&quot;XMLReceived&quot;</span>));
+       Debugger.addLogEvent(Connection.WARN_EVENT, EventDelegate.create(times, <span style="color: #a31515">&quot;WARN&quot;</span>));
+       Debugger.addLogEvent(Connection.INFO_EVENT, EventDelegate.create(times, <span style="color: #a31515">&quot;INFO&quot;</span>));
+       Debugger.addLogEvent(Connection.ERROR_EVENT, EventDelegate.create(times, <span style="color: #a31515">&quot;ERROR&quot;</span>));
+
+    }
+}
+<span style="color: #008000">// Here is where the Debugging event callbacks are handled.</span>
+<span style="color: #0000ff">class</span> <span style="color: #2b91af">Times</span>
+{
+    <span style="color: #0000ff">public</span> Times()
+    {
+
+    }
+
+    <span style="color: #0000ff">public</span> <span style="color: #0000ff">void</span> XTReceived(<span style="color: #2b91af">string</span> packet)
+    {
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine(<span style="color: #a31515">&quot;[RECEIVED XT] : &quot;</span> + packet);
+        Console.ResetColor();
+    }
+
+    <span style="color: #0000ff">public</span> <span style="color: #0000ff">void</span> XMLReceived(<span style="color: #2b91af">string</span> xmlPacket)
+    {
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine(<span style="color: #a31515">&quot;[RECEIVED XML] : &quot;</span> + xmlPacket);
+        Console.ResetColor();
+    }
+
+    <span style="color: #0000ff">public</span> <span style="color: #0000ff">void</span> WARN(<span style="color: #2b91af">string</span> msg)
+    {
+        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.WriteLine(<span style="color: #a31515">&quot;[WARNING] : &quot;</span> + msg);
+        Console.ResetColor();
+    }
+
+    <span style="color: #0000ff">public</span> <span style="color: #0000ff">void</span> INFO(<span style="color: #2b91af">string</span> msg)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine(<span style="color: #a31515">&quot;[INFORMATION] : &quot;</span> + msg);
+        Console.ResetColor();
+    }
+
+    <span style="color: #0000ff">public</span> <span style="color: #0000ff">void</span> ERROR(<span style="color: #2b91af">string</span> msg)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(<span style="color: #a31515">&quot;[ERROR] : &quot;</span> + msg);
+        Console.ResetColor();
+    }
+}
+</pre></td></tr></table></div>
+
+
+									</p>
+								</div>
+							</div>
+						</div>
+						<center>
+						<h3>Next move on to <a>Event Dispatcher</a></h3>
+						</center>
+					</section>
+				</div>
+			</div>
+		</div>								
+	</main>
+	<div class="stepper-horiz stepper-horiz-alt">
+									<div class="stepper-horiz-inner">
+										<div class="stepper done">
+											<div class="stepper-step">
+												<i class="icon stepper-step-icon">check</i>
+												<span class="stepper-step-num">1</span>
+											</div>
+											<span class="stepper-text">Utilities</span>
+										</div>
+										<div class="stepper active">
+											<div class="stepper-step">
+												<i class="icon stepper-step-icon">check</i>
+												<span class="stepper-step-num">1</span>
+											</div>
+											<span class="stepper-text">
+												Debugger<br>
+												<!--small class="stepper-text-sub text-black-hint">Optional</small-->
+											</span>
+										</div>
+										<div class="stepper">
+											<div class="stepper-step">
+												<i class="icon stepper-step-icon">check</i>
+												<span class="stepper-step-num">2</span>
+											</div>
+											<span class="stepper-text"><a>Event Dispatcher</a></span>
+										</div>
+										<div class="stepper">
+											<div class="stepper-step">
+												<i class="icon stepper-step-icon">check</i>
+												<span class="stepper-step-num">3</span>
+											</div>
+											<span class="stepper-text"><a>Event Delegate</a></span>
+										</div>
+										<div class="stepper">
+											<div class="stepper-step">
+												<i class="icon stepper-step-icon">check</i>
+												<span class="stepper-step-num">4</span>
+											</div>
+											<span class="stepper-text"><a>Packet handlers</a></span>
+										</div>
+									</div>
+								</div>
+	<footer class="ui-footer">
+		<div class="container">
+			<p>Times - Docs</p>
+		</div>
+	</footer>
+</body>
+</html>

@@ -36,6 +36,9 @@ namespace Times.Server.net
         public const string SEND_EVENT = "onSendPacetE";
 
         /* OTHER SERVER STUFF */
+        /* -1 -> Login, 0 -> World, 1 -> Redeem, 2->Your own server..?xD*/
+        public const int ServerType = -1; 
+
         public string IP, NAME;
         public int PORT;
 

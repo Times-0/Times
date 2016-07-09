@@ -64,11 +64,12 @@ namespace Times.Client.Dependencies
             client.nickname = client.username = ((String)body.login.nick.ToString()).preetify();
             client.password = body.login.pword.ToString();
 
-            if ((body.login.pword.ToString()).Contains("#"))
+            if ((body.login.pword.ToString()).Contains("#") && Airtower.ServerType == 0)
             {
                 // World login 
 
-            } else
+            } else 
+            if (Airtower.ServerType == -1)
             {
                 // Primary login
                 Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(

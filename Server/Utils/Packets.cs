@@ -46,7 +46,7 @@ namespace Times.Server.Utils
                     return XML_DATA;
                 } catch (Exception exc)
                 {
-                    Console.WriteLine("Error : " + exc.ToString());
+                    Server.Log.Debugger.CallEvent(Server.Airtower.ERROR_EVENT, exc.ToString());
                     return InvalidPacket;
                 }
             }
@@ -56,7 +56,8 @@ namespace Times.Server.Utils
 
         public static int Parse(string data, Penguin pengObj)
         {
-            pengObj.clientData.Clear();
+            try { pengObj.clientData.Clear(); }
+            catch { };
             if (data == "" || data == null)
                 return InvalidPacket;
 
@@ -92,10 +93,11 @@ namespace Times.Server.Utils
             {
                 if (peng.clientData == null)
                     return;
-                
 
-                var callbackHandlerName = String.Format("#xt{0}-{1}/", category, handler);
-                Airtower.getCurrentAirtower().updateListeners(callbackHandlerName, new { client = peng }, vars.ToArray());
+                String action = peng.clientData.body["action"];
+                var callbackHandlerName = String.Format("#xml{0}/", action);
+
+                Events.EventDispatcher._dispatcher.updateListeners(callbackHandlerName, peng, peng.clientData.body);
             }
             catch (Exception) { }
         }

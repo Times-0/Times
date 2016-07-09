@@ -24,11 +24,6 @@ namespace Times.Server.Log
 
         public static void CallEvent(string Event, params dynamic[] args)
         {
-            if (!net.Connection.Debug)
-            {
-                return;
-            }
-
             object[] Params = args;
 
             if (!Loggers.ContainsKey(Event)) return;

@@ -19,17 +19,7 @@ namespace Times.Server.net
     {
         public AirtowerEvent(dynamic Airtower)
         {
-            this.initialize(Airtower);
-        }
-
-        new protected void initialize(dynamic Obj)
-        {
-            Obj.addEventListener = EventDelegate.create(this, "addEventListener");
-            Obj.addListener = EventDelegate.create(this, "addEventListener");
-            Obj.removeEventListener = EventDelegate.create(this, "removeEventListener");
-            Obj.removeListener = EventDelegate.create(this, "removeEventListener");
-            Obj.dispatchEvent = EventDelegate.create(this, "dispatchEvent");
-            Obj.updateListeners = EventDelegate.create(this, "updateListeners");
+            initialize(Airtower);
         }
     }
 
@@ -43,6 +33,7 @@ namespace Times.Server.net
         public const string INFO_EVENT = "onInfoE";
         public const string WARN_EVENT = "onWarnE";
         public const string ON_SERVER_END = "onServerFatalStop";
+        public const string SEND_EVENT = "onSendPacetE";
 
         /* OTHER SERVER STUFF */
         public string IP, NAME;
@@ -91,6 +82,7 @@ namespace Times.Server.net
 
             __airtower__O = this;
             new AirtowerEvent(__airtower__O);
+            Utils.Events.EventDispatcher._dispatcher.updateListeners("#xmlverChk/", null, new Dictionary<string, string> { {"action", "" } });
         }
 
         public void startConnection()
@@ -145,6 +137,7 @@ namespace Times.Server.net
             }
 
             // Server stopped!
+            Log.Debugger.CallEvent(INFO_EVENT, "Airtower Stopped");
             this.isServerRunning = false;
 
             return false;
@@ -182,7 +175,7 @@ namespace Times.Server.net
                     Airtower.Clients.Remove(client);
                     try
                     {
-                        clientOj.Dispose();
+                        clientOj.disconnected();
                     }
                     catch (Exception) { };
                 }
@@ -193,7 +186,9 @@ namespace Times.Server.net
                     Penguin objClient = Airtower.Clients[sock];
                     Airtower.Clients.Remove(sock);
 
-                    objClient.Dispose();
+                    // objClient.Dispose(); // Later..
+                    try { objClient.disconnected(); }
+                    catch { }
                 }
             }
 

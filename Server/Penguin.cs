@@ -6,22 +6,27 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
+using System.Windows.Forms;
 
 namespace Times.Server
 {
     using Utils;
     using net;
+    using Client;
 
-    class Penguin : Dynamic, IDisposable
+    class Penguin : Dynamic
     {
         public string username = "", nickname = "", password = "", swid = "", id = "";
-        public bool member = false, moderator = false;
+        public bool member = false, moderator = false, banned = false;
         public int age = 0, membershipDays = 0;
 
         private bool __listen__on = false;
         private AutoResetEvent RecvDataEvent = new AutoResetEvent(false);
 
         protected AutoResetEvent _listen__Event = new AutoResetEvent(false);
+
+        public Shell shell = Shell.getCurrentShell();
+
         public bool canListen
         {
             get
@@ -61,7 +66,43 @@ namespace Times.Server
             return this.socket;
         }
 
-        public async void startConnection()
+        private void endSend(string data)
+        {
+            data = data.Take(data.Length - 1).ToList().join("");
+            Log.Debugger.CallEvent(Airtower.SEND_EVENT, data);
+        }
+
+        public void send(string data)
+        {
+            if (this.socket.Connected)
+            {
+                byte[] buffer = Encoding.ASCII.GetBytes(data + "\x00");
+
+                try { this.socket.Send(buffer); this.endSend(data + "\x00"); }
+                catch { };
+            }
+        }
+
+        public void send(params string[] args)
+        {
+            if (this.socket.Connected)
+            {
+                var packets = new List<string> { "", "xt", args[0] };
+                var internalID = this.shell.getServerRoomIdByPenguinObject(this);
+
+                packets.Add(internalID);
+                packets = packets.Concat(args.Skip(1)).ToList();
+                packets.Add("\x00");
+
+                String data = packets.join("%");
+                byte[] buffer = Encoding.ASCII.GetBytes(data);
+
+                try { this.socket.Send(buffer); this.endSend(data); }
+                catch { };
+            }
+        }
+
+        public void startConnection()
         {
             var recv_func = new Action(() =>
             {
@@ -72,7 +113,10 @@ namespace Times.Server
                     if (this.canListen)
                     {
                         // Avoid creating new AysncCallback for receive data each time.
-                        this.socket.BeginReceive(this.buffer, 0, this.buffer.Length, 0, receiveCallback, this.socket);
+                        try
+                        {
+                            this.socket.BeginReceive(this.buffer, 0, this.buffer.Length, 0, receiveCallback, this.socket);
+                        } catch { break; }
                         this.RecvDataEvent.WaitOne();
                     }
                     else
@@ -88,12 +132,16 @@ namespace Times.Server
             this.canListen = true;
             this.canSend = true;
 
-            await Task.Run(() => recv_func());
+            new Thread(() => recv_func()).Start();
+            Task.Run(() => recv_func());
         }
 
         protected void receiveDataFromClient(IAsyncResult datas)
         {
-            int bytesReceived = ((Socket)datas.AsyncState).EndReceive(datas);
+            int bytesReceived;
+
+            try { bytesReceived = ((Socket)datas.AsyncState).EndReceive(datas); }
+            catch { return; }
 
             if (bytesReceived > 0)
             {
@@ -106,6 +154,8 @@ namespace Times.Server
                     string partialdata = this.partialBuffer.ToString();
                     string[] packet = partialdata.Split(char.Parse("\x00"));
 
+                    this.partialBuffer.Clear();
+
                     for(int i = 0; i < packet.Length - 1; i++)
                     {
                         string _loc1_ = packet[i];
@@ -114,7 +164,7 @@ namespace Times.Server
                         if (parse == Packets.InvalidPacket)
                         {
                             // Better to remove that penguin
-                            Console.WriteLine("Incorrect Packet : " + _loc1_);
+                            Log.Debugger.CallEvent(Airtower.ERROR_EVENT, "Incorrect Packet : " + _loc1_);
                             Airtower.disposeClient(false, this.socket);
                             break;
                         }
@@ -128,19 +178,25 @@ namespace Times.Server
                         if (parse == Packets.XML_DATA)
                         {
                             if (_loc1_ == "<policy-file-request/>")
+                            {
+                                this.send(String.Format("<cross-domain-policy><allow-access-from domain='*'" +
+                                    " to-ports='{0}' /></cross-domain-policy>", Airtower.getCurrentAirtower().PORT));
                                 return;
-                            Packets.HandleXMLPacket(this);
+                            }
+
                             Log.Debugger.CallEvent(Airtower.XML_EVENT, _loc1_);
+                            Packets.HandleXMLPacket(this);
                         }
                     }
+
                 }
+
+                this.RecvDataEvent.Set();
             }
             else
             {
                 Airtower.disposeClient(false, this.socket);
             }
-
-            this.RecvDataEvent.Set();
         }
 
         protected bool checkForPartialData(string data)
@@ -150,7 +206,9 @@ namespace Times.Server
                 this.partialBuffer.Append(data);
 
                 if (this.partialBuffer.ToString().EndsWith("\x00"))
+                {
                     return false;
+                }
 
                 return true;
             } else
@@ -172,9 +230,10 @@ namespace Times.Server
         new public void disconnected()
         {
             // stuff to do after penguin disconnected.
+
             this.canListen = false;
             this.canSend = false;
-            this.clientData.Dispose();
+
             Log.Debugger.CallEvent(Airtower.INFO_EVENT, String.Format("{0} disconnected.", this.username));
 
             if (this.socket.Connected)

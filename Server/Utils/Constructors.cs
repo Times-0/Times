@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using System.Dynamic;
 using System.Reflection;
 using XmlToDynamic;
+using System.Windows.Forms;
 
 namespace Times.Server.Utils
 {
-    public class Dynamic : DynamicObject, IDisposable
+    public class Dynamic : DynamicObject
     {
 
         public dynamic addEventListener { get; set; }
@@ -142,39 +143,10 @@ namespace Times.Server.Utils
         }
 
         /* DISPOSABLE AREA*/
-        bool disposed = false;
-
-        // Public implementation of Dispose pattern callable by consumers.
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
         
         public void disconnected()
         {
             
-        }
-
-        // Protected implementation of Dispose pattern.
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed)
-                return;
-
-            if (disposing)
-            {
-                this.disconnected();
-            }
-
-            // Free any unmanaged objects here.
-            //
-            disposed = true;
-        }
-
-        ~Dynamic()
-        {
-            Dispose(false);
         }
     }
 

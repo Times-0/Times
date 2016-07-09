@@ -32,14 +32,14 @@ namespace Times.Server.Utils.Events
         {
             List<dynamic> _loc1_ = EventDispatcher.getListenersList(this, e_type);
             int _loc2_ = EventDispatcher.getListenerIndex(_loc1_, e_handler, e_scope);
-
+            
             if (_loc2_ == -1)
             {
                 dynamic _loc3_ = new ExpandoObject();
                 _loc3_.handler = e_handler;
                 _loc3_.scope = e_scope;
                 _loc1_.Add(_loc3_);
-
+                
                 return true;
             }
             
@@ -60,14 +60,12 @@ namespace Times.Server.Utils.Events
             return false;
         }
 
-        public bool updateListeners(string type, dynamic Event = null, params dynamic[] args)
+        public bool updateListeners(string type, params dynamic[] args)
         {
-            if (Event == null)
-            {
-                Event = new ExpandoObject();
-            }
+            dynamic Event = new ExpandoObject();
 
             Event.type = type;
+
             return this.dispatchEvent(Event, args);
         }
 
@@ -75,7 +73,6 @@ namespace Times.Server.Utils.Events
         {
             var _loc1_ = EventDispatcher.getListenersList(_dispatcher, Event.type);
             int _loc2_ = _loc1_.Count;
-
             if (_loc2_ < 1)
             {
                 return false;
@@ -88,7 +85,7 @@ namespace Times.Server.Utils.Events
                 
                 if (_loc1_[_loc3_].scope == null)
                 {
-                    handler.DynamicInvoke(new Object[] { Event }.Concat(args).ToArray());
+                    handler.DynamicInvoke(new Object[] {}.Concat(args).ToArray());
                 } else
                 {
                     handler.Invoke(Event);

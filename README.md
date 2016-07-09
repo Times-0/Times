@@ -1,6 +1,8 @@
 ## Times - Server ##
 An C# Event driven, multi threaded AS3 CPPS Emulator.
 
+THIS IS THE CODE FOR LOGIN SERVER.
+
 Visit https://times-0.github.io/Times/ To view Times docs.
 ## Usage ##
  - All you need to do is, add this file to your C# Solution.

@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.Sockets;
 using System.IO;
 using System.Security.Cryptography;
 using MySql.Data.MySqlClient;
@@ -110,6 +111,33 @@ namespace Times.Server.Utils
             @o.addEventListener(String.Format("#xml{0}/", @handle), dlg, null);
         }
 
+        public static void AddXTHandler(this object @obj, string handle, string handle1, string @handler)
+        {
+            Delegate dlg = Events.EventDelegate.create(@obj, @handler);
+
+            net.Airtower @o = net.Airtower.getCurrentAirtower();
+            @o.addEventListener(String.Format("#xt{0}-{1}/", handle, handle1), dlg, null);
+        }
+
+        public static void AddEventHandler (this object @obj, string tohadle, string handler)
+        {
+            Delegate dlg = Events.EventDelegate.create(@obj, handler);
+
+            net.Airtower @o = net.Airtower.getCurrentAirtower();
+            @o.addEventListener(tohadle, dlg, null);
+        }
+
+        public static Penguin GetPenguinById(this Dictionary<Socket, Penguin> @o, string id)
+        {
+            foreach(var i in @o)
+            {
+                if (i.Value.id == id)
+                    return i.Value;
+            }
+
+            return null;
+        }
+
         public static String GetURLContents(this string @url)
         {
             System.Net.WebClient webClient = new System.Net.WebClient();
@@ -124,6 +152,19 @@ namespace Times.Server.Utils
             {
                 details = Enumerable.Range(0, @reader.FieldCount).ToDictionary
                     (i => @reader.GetName(i), i => @reader.GetValue(i).ToString());
+            }
+
+            return details;
+        }
+
+        public static List<Dictionary<string, string>> GetListFromDict(this MySqlDataReader @reader)
+        {
+            List<Dictionary<string, string>> details = new List<Dictionary<string, string>> { };
+
+            while (@reader.Read())
+            {
+                details.Add(Enumerable.Range(0, @reader.FieldCount).ToDictionary
+                    (i => @reader.GetName(i), i => @reader.GetValue(i).ToString()));                
             }
 
             return details;
@@ -154,6 +195,20 @@ namespace Times.Server.Utils
 
             return BitConverter.ToString(md5).Replace("-", "").ToLower();
 
+        }
+
+        public static bool userInServer(this string id, int port)
+        {
+            var users = Server.net.Airtower.Clients.Values.ToList();
+            for (var i = 0; i < users.Count; i++)
+            {
+                if (users[i].id == id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /*public static Dynamic ToDynamic<T>(this List<T> @list)

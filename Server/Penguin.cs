@@ -1,24 +1,34 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net.Sockets;
+using MySql.Data.MySqlClient;
 using System.Net;
 using System.Windows.Forms;
 
 namespace Times.Server
 {
     using Utils;
+    using Utils.MySQL;
     using net;
     using Client;
+    using Client.Base;
 
     class Penguin : Dynamic
     {
         public string username = "", nickname = "", password = "", swid = "", id = "";
         public bool member = false, moderator = false, banned = false;
-        public int age = 0, membershipDays = 0;
+        public string frame = "", color = "", head = "", face = "", neck = "", body = "", hand = "", feet = "", bg = "", pin = "";
+        public string avatar = "", avatarAttributes = "";
+        public int x = 0, y = 0;
+        public int age = 0, membershipDays = 0, coins = 0, RegistrationDate = 0;
+        public List<string> epf = new List<string> { };
+        public List<string> stamps = new List<string> { };
+
+        public Dictionary<string, string> Cache = new Dictionary<string, string> { };
 
         private bool __listen__on = false;
         private AutoResetEvent RecvDataEvent = new AutoResetEvent(false);
@@ -51,14 +61,206 @@ namespace Times.Server
 
         protected Socket socket;
         byte[] buffer = new byte[1024 * 2]; // 2KB
+        public int PORT;
+
+        public BaseRoom Room;
+        public List<string> XTExcemption = new List<string> { "s$p#getdigcooldown", "s$j#js" };
+        public bool doXT = false;
 
         /* CLIENT PACKETS RECEIVED, WHICH ARE PARSED*/
         public dynamic clientData;
 
-        public Penguin(Socket sock)
+        public Penguin(Socket sock, int p)
         {
+            this.PORT = p;
             this.socket = sock;
             this.clientData = new Dynamic();
+        }
+
+        public void LoadPenguinDetails(AutoResetEvent DetailsEvent)
+        {
+            AutoResetEvent fetchEvent = new AutoResetEvent(false);
+            MySQL.getCurrentMySQLObject().MySQLCallback(String.Format(
+            "SELECT `Color`, `Head`, `Face`, `Neck`, `Body`, `Hand`, `Feet`, `Photo`, `Flag` FROM `Penguins` WHERE `ID` = '{0}'"
+            , this.id), Utils.Events.EventDelegate.create(this, "FetchClothings"), fetchEvent);
+
+            fetchEvent.WaitOne();
+
+            MySQL.getCurrentMySQLObject().MySQLCallback(String.Format(
+           "SELECT `Avatar`, `AvatarAttributes`, `RegistrationDate`, `Moderator`, `Coins`, `Stamps`, `EPF` FROM `Penguins` WHERE `ID` = '{0}'"
+           , this.id), Utils.Events.EventDelegate.create(this, "FetchPenguinDetails"), fetchEvent);
+
+            fetchEvent.WaitOne();
+
+            MySQL.getCurrentMySQLObject().MySQLCallback(String.Format(
+                "SELECT `Cache`, `nx` FROM `Cache` WHERE `ID` = '{0}'", this.id), 
+                Utils.Events.EventDelegate.create(this, "FetchPenguinCache"), fetchEvent);
+
+            fetchEvent.WaitOne();
+
+            DetailsEvent.Set();
+        }
+
+        protected string ListValue(List<string> L, int i)
+        {
+            if (i > L.Count - 1)
+            {
+                return "";
+            } else
+            {
+                return L[i];
+            }
+        }
+
+        public void FetchPenguinCache(MySqlDataReader reader, AutoResetEvent Evnt)
+        {
+            var _dict = reader.GetDictFromReader();
+            List<String> details = (_dict["Cache"]).Split(new char[] { ';' }).ToList();
+
+            this.Cache["PlayerWidget"] = ListValue(details, 0);
+            this.Cache["MapCategory"] = ListValue(details, 1);
+            this.Cache["Igloo"] = ListValue(details, 2);
+            this.Cache["GAS"] = ListValue(details, 3);
+
+            this.Cache["NX"] = _dict["nx"];
+
+            Evnt.Set();
+        }
+
+        public void FetchPenguinDetails(MySqlDataReader reader, AutoResetEvent evnt)
+        {
+            var details = reader.GetDictFromReader();
+
+            this.coins = int.Parse(details["Coins"]);
+            this.avatar = details["Avatar"];
+            this.avatarAttributes = details["AvatarAttributes"];
+            this.RegistrationDate = int.Parse(details["RegistrationDate"]);
+            this.moderator = bool.Parse(details["Moderator"]);
+            this.epf = details["EPF"].Split(',').ToList();
+
+            long one_day = 24 * 60 * 60;
+            long currentTmsp = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+            this.age = (int)Math.Floor((decimal)((currentTmsp - this.RegistrationDate) / one_day));
+            /* Membership days:
+            if age <= 3 months = 3 x 30.5 = 91.5, then membership = age / 10 * 30.5
+            if age > 3 months <= 13 months, then membership = age/10 * 3
+            if age > 13, then membership = floor((age - 365) * 100 / 365)
+            */
+
+            this.membershipDays = (int)(this.age <= 91.5 ? Math.Floor((decimal)(this.age * 10 / 365)) :
+                this.age > 91.5 & this.age <= 396.5 ? Math.Floor((decimal)(this.age * 3 / 10)) :
+                Math.Floor((decimal)((this.age - 365) * 100 / 365)));
+
+            // ToDo : Stamps
+
+            evnt.Set();
+        }
+
+        public void GenerateString()
+        {
+            if (Shell.getCurrentShell().getCurmbs("PlayerCache").ContainsKey(this.id))
+            {
+                Shell.getCurrentShell().getCurmbs("PlayerCache").Remove(this.id);
+            }
+
+            this.ToString();
+        }
+
+        public void FetchClothings(MySqlDataReader reader, AutoResetEvent evnt)
+        {
+            var details = reader.GetDictFromReader();
+
+            this.color = details["Color"];
+            this.head = details["Head"];
+            this.face = details["Face"];
+            this.neck = details["Neck"];
+            this.body = details["Body"];
+            this.hand = details["Hand"];
+            this.feet = details["Feet"];
+            this.bg = details["Photo"];
+            this.pin = details["Flag"];
+
+            evnt.Set();
+        }
+
+        public List<string> PuffleData()
+        {
+            AutoResetEvent PE = new AutoResetEvent(false);
+
+            List<string> puffle_details = new List<string> { };
+            Action<MySqlDataReader, AutoResetEvent> PD = new Action<MySqlDataReader, AutoResetEvent>((reader, evnt) =>
+            {
+                var details = reader.GetListFromDict();
+
+                for(int i = 0; i < details.Count; i++)
+                {
+                    var detail = details[i];
+                    string data = detail["ID"];
+                    data += "|" + detail["Type"];
+                    data += "|" + (detail["Subtype"] == "0" ? "" : detail["Subtype"]);
+                    data += "|" + detail["Name"];
+                    data += "|" + detail["AdoptionDate"];
+                    data += "|" + (new List<string> { detail["Food"], detail["Play"], detail["Rest"], detail["Clean"] }).join("|");
+                    data += "|" + detail["Hat"];
+
+                    puffle_details.Add(data);
+                }
+
+                PE.Set();
+
+            });
+
+            MySQL.getCurrentMySQLObject().MySQLCallback(String.Format(
+            String.Format("SELECT ID, Type, Subtype, Name, AdoptionDate, Food, Play, Rest, Clean, Hat FROM `puffles` WHERE Owner = {0}", this.id), 
+            this.id), PD, PE);
+
+            PE.WaitOne();
+
+            return puffle_details;
+        }
+
+        new public string ToString()
+        {
+            if (!(Shell.getCurrentShell().getCurmbs("PlayerCache")).ContainsKey(this.id))
+            {
+                List<string> PCache = new List<string>
+                {
+                    this.id,
+                    this.username,
+
+                    "45", //language
+
+                    this.color,
+                    this.head,
+                    this.face,
+                    this.neck,
+                    this.body,
+                    this.hand,
+                    this.feet,
+                    this.bg,
+                    this.pin,
+
+                    this.x.ToString(),
+                    this.y.ToString(),
+                    this.frame,
+
+                    this.membershipDays > 0 ? "1" : "0", // IsMember
+                    this.membershipDays.ToString(),
+
+                    this.avatar,
+                    null, // Does Nothing ??
+                    "", //  Party info, blank??
+
+                    "", // Puffle id
+                    ""  // Puffle head id
+                };
+
+                (Shell.getCurrentShell().getCurmbs("PlayerCache"))[this.id] = PCache.join("|");
+                return Shell.getCurrentShell().GetPlayerString(this.id);
+            } else
+            {
+                return Shell.getCurrentShell().getCurmbs("PlayerCache")[this.id];
+            }
         }
 
         public Socket getSocket()
@@ -172,11 +374,12 @@ namespace Times.Server
                         // handle packets acc to received, if xt or xml
                         if (parse == Packets.XT_DATA)
                         {
-                            Packets.HandleXTPacket(this);
                             Log.Debugger.CallEvent(Airtower.XT_EVENT, _loc1_);
+                            Packets.HandleXTPacket(this);
                         } else 
                         if (parse == Packets.XML_DATA)
                         {
+                            Log.Debugger.CallEvent(Airtower.XML_EVENT, _loc1_);
                             if (_loc1_ == "<policy-file-request/>")
                             {
                                 this.send(String.Format("<cross-domain-policy><allow-access-from domain='*'" +
@@ -184,7 +387,6 @@ namespace Times.Server
                                 return;
                             }
 
-                            Log.Debugger.CallEvent(Airtower.XML_EVENT, _loc1_);
                             Packets.HandleXMLPacket(this);
                         }
                     }
@@ -243,4 +445,3 @@ namespace Times.Server
         }
     }
 }
-

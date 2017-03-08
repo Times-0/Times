@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -37,10 +37,13 @@ namespace Times.Server.net
 
         /* OTHER SERVER STUFF */
         /* -1 -> Login, 0 -> World, 1 -> Redeem, 2->Your own server..?xD*/
-        public const int ServerType = -1; 
+        public static Dictionary<int, int> ServerType = new Dictionary<int, int>
+            { { 6112, -1 }, {9875, 0 } };
 
         public string IP, NAME;
         public int PORT;
+
+        public int max_clients = 1500;
 
         private bool _serverRun = false;
         public bool isServerRunning
@@ -107,7 +110,7 @@ namespace Times.Server.net
             {
                 this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 this.socket.Bind(IPEnd);
-                this.socket.Listen(15);
+                this.socket.Listen(100);
                 this.isServerRunning = true;
             } catch(Exception except)
             {
@@ -119,8 +122,11 @@ namespace Times.Server.net
             {
                 try
                 {
-                    this.socket.BeginAccept(new AsyncCallback(NewPenguinConnection), this.socket);
-                    this.Server_event.WaitOne();
+                    if (this.max_clients + 1 > Airtower.Clients.Count)
+                    {
+                        this.socket.BeginAccept(new AsyncCallback(NewPenguinConnection), this.socket);
+                        this.Server_event.WaitOne();
+                    }
                 } catch (Exception except)
                 {
                     // Try again until max_times.
@@ -153,7 +159,7 @@ namespace Times.Server.net
 
             Log.Debugger.CallEvent(INFO_EVENT, String.Format("New penguin : #{0}", Airtower.Clients.Count + 1));
 
-            Penguin objPeng = new Penguin(client);
+            Penguin objPeng = new Penguin(client, this.PORT);
 
             Airtower.Clients[client] = objPeng;
 

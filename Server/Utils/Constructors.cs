@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +21,7 @@ namespace Times.Server.Utils
         public dynamic updateListeners { get; set; }
 
         private Dictionary<string, object> _properties = new Dictionary<string, object>();
-        private Dictionary<int, object> _indexed = new Dictionary<int, object> { };
+        public Dictionary<int, object> _indexed = new Dictionary<int, object> { };
         public int length = 0;
 
         // remove all variables from this instance

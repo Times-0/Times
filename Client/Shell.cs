@@ -14,16 +14,13 @@ namespace Times.Client
 
     class Shell : Dynamic
     {
-        public static List<Penguin> _penguins = new List<Penguin> { };
-
         public static bool IsWorldServer = false;
         public static bool IsLoginServer = false;
         // TODO : Recognize Redeem server.
         public static bool IsRedeemServer = false;
 
         protected static Shell __shell__O;
-
-        protected Dictionary<Penguin, string> ServerRoomId = new Dictionary<Penguin, string> { };
+        
         protected Dictionary<string, dynamic> Crumbs = new Dictionary<string, dynamic> { };
 
         public Shell()
@@ -71,18 +68,20 @@ namespace Times.Client
 
         public string getServerRoomIdByPenguinObject(Penguin client)
         {
-            if (!this.ServerRoomId.ContainsKey(client))
-            {
-                return "-1";
-            } else
-            {
-                return this.ServerRoomId[client];
-            }
+            if (client.Room != null)
+                return client.Room.GetRoomId();
+            return "-1";
+        }
+
+        public Client.Base.BaseRoom getServerRoomObjectByPenguinObject(Penguin client)
+        {
+            if (client.Room != null)
+                return client.Room;
+            return null;
         }
 
         private void pushListeners()
         {
-            //this.addListener("onDisconnectSocket", EventDelegate.create(this, "removePenguinObject"), this);
             
         }
 
@@ -104,6 +103,10 @@ namespace Times.Client
 
                     new System.IO.StreamWriter(CrumbsDir + file).WriteLine(Data);
                 }
+
+                // Call all handlers, which needs that crumb cache.
+                string EventHandler = String.Format("!Crumbs!{0}", file);
+                EventDispatcher._dispatcher.updateListeners(EventHandler, CrumbsDir + file);
             }
         }
 
@@ -112,12 +115,18 @@ namespace Times.Client
             this.Crumbs["Login"] = new Dictionary<string, Dictionary<Penguin, dynamic>> { };
             // Penguin -> {random Key, login hash}
             this.Crumbs["Login"]["HashKey"] = new Dictionary<Penguin, dynamic> { };
-            // Handles failed login, and the time they failed to login.
-            // Penguin -> { No of times failed, Timestamp of prev fail, banned for }
+
+            /* TODO:
+              -: Handles failed login, and the time they failed to login.
+              -: Penguin -> { No of times failed, Timestamp of prev fail, banned for } 
+            */
             this.Crumbs["Login"]["FailedAttempts"] = new Dictionary<Penguin, dynamic>{ };
 
             // General crumbs.
             CheckForCrumbs(new List<string> { "rooms.json", "mascots.json", "paper_items.json" });
+
+            // Penguin id -> playerString
+            this.Crumbs["PlayerCache"] = new Dictionary<string, string> { };
         }
 
         public dynamic getCurmbs(string Name)
@@ -125,6 +134,17 @@ namespace Times.Client
             if (!this.Crumbs.ContainsKey(Name)) return null;
 
             return this.Crumbs[Name];
+        }
+
+        public string GetPlayerString(string id)
+        {
+            if (this.Crumbs["PlayerCache"].ContainsKey(id))
+            {
+                return this.Crumbs["PlayerCache"][id];
+            } else
+            {
+                return Server.net.Airtower.Clients.GetPenguinById(id).ToString();
+            }
         }
 
         public static Shell getCurrentShell()

@@ -61,21 +61,99 @@ namespace Times.Client.Dependencies
             if (body.login.nick == null) return;
             if (GetPenguinRandomKey(client) == null) return;
 
-            client.nickname = client.username = ((String)body.login.nick.ToString()).preetify();
+            client.nickname = client.username = (String)body.login.nick.ToString();
             client.password = body.login.pword.ToString();
 
-            if ((body.login.pword.ToString()).Contains("#") && Airtower.ServerType == 0)
+            if (Airtower.ServerType.ContainsKey(client.PORT))
             {
-                // World login 
-
-            } else 
-            if (Airtower.ServerType == -1)
-            {
-                // Primary login
-                Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(
-                    String.Format("SELECT `ID`, `Password`, `Email`, `SWID` FROM `Penguins` WHERE `Username` = '{0}'", client.username), 
-                    Server.Utils.Events.EventDelegate.create(this, "ContinuePrimaryLogin"), client, body);
+                if ((body.login.pword.ToString()).Contains("#") && Airtower.ServerType[client.PORT] == 0)
+                {
+                    // World login 
+                    Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(
+                        String.Format("SELECT `ID`, `Password`, `Email`, `SWID` FROM `Penguins` WHERE `ID` = '{0}'", client.username.Split(char.Parse("|"))[0]),
+                        Server.Utils.Events.EventDelegate.create(this, "ContinueWorldLogin"), client, body);
+                }
+                else
+                if (Airtower.ServerType[client.PORT] == -1)
+                {
+                    // Primary login
+                    Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(
+                        String.Format("SELECT `ID`, `Password`, `Email`, `SWID` FROM `Penguins` WHERE `Username` = '{0}'", client.username),
+                        Server.Utils.Events.EventDelegate.create(this, "ContinuePrimaryLogin"), client, body);
+                }
             }
+        }
+
+        public void ContinueWorldLogin(MySqlDataReader reader, Penguin client, dynamic body)
+        {
+            if (!reader.HasRows || GetPenguinRandomKey(client) == null)
+            {
+                client.send("e", "101", "#1");
+                Airtower.disposeClient(false, client.getSocket());
+                return;
+            }
+
+            if (body == null) return;
+            if (body.login == null) return;
+            if (body.login.pword == null) return;
+            if (body.login.nick == null) return;
+            if (GetPenguinRandomKey(client) == null) return;
+
+            string[] userInfo = body.login.nick.Value.Split(char.Parse("|"));
+            if (userInfo[0].userInServer(9875))
+            {
+                client.send("e", "3");
+                Airtower.disposeClient(false, client.getSocket());
+                return;
+            }
+
+            client.id = userInfo[0];
+
+            AutoResetEvent banEvent = new AutoResetEvent(false);
+            Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(
+                    String.Format("SELECT `till` FROM `banned` WHERE `ID` = '{0}'", client.id),
+                    Server.Utils.Events.EventDelegate.create(this, "HandlePenguinBanned"), client, banEvent);
+
+            banEvent.WaitOne();
+
+            if (client.banned)
+                return;
+
+
+            Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(
+                String.Format("SELECT `ID`, `Username`, `Password`, `Email`, `SWID`, `LoginKey`, `ConfirmationHash` FROM `Penguins` WHERE `ID` = '{0}'", client.id),
+                Server.Utils.Events.EventDelegate.create(this, "CompleteLogin"), client, body);
+        }
+
+        public void CompleteLogin(MySqlDataReader reader, Penguin client, dynamic body)
+        {
+            var details = reader.GetDictFromReader();
+            //"101|OP1-{AB-ERTS-972H}-09-K|valid22|f54fb87b5b1e6120e28c5bbf1a6ca862|NULL|45|2"
+            var nick = ((string)body.login.nick.Value).Split(char.Parse("|"));
+            client.swid = nick[1];
+            client.username = client.nickname = ((string)nick[2]).preetify();
+            string password = nick[3];
+
+            if (client.username.ToLower() != details["Username"].ToLower() || password != details["ConfirmationHash"] || 
+                client.swid != details["SWID"] || password == "")
+            {
+                client.send("e", "101", "#2");
+                Airtower.disposeClient(false, client.getSocket());
+                return;
+            }
+
+            var pword = body.login.pword.Value.Split(char.Parse("#"));
+           
+            if (pword[0] != String.Format("{0}{1}", (password + GetPenguinRandomKey(client)).md5().swap(16), password) || pword[1] != details["LoginKey"] || pword[0] == "" || 
+                pword[1] == "")
+            {
+                client.send("e", "101", "#3");
+                Airtower.disposeClient(false, client.getSocket());
+                return;
+            }
+
+            client.send("l", "$loggedin");
+            return;
         }
 
         public void ContinuePrimaryLogin(MySqlDataReader reader, Penguin client, dynamic data)
@@ -109,10 +187,14 @@ namespace Times.Client.Dependencies
             if (client.banned)
                 return;
 
-            string ConfHash = GetPenguinRandomKey(client).md5() + "-" + penguin_details["Password"];
+            string ConfHash = GetPenguinRandomKey(client).md5() + "-" + penguin_details["Password"].GetHashCode().ToString().md5();
             Shell.getCurrentShell().getCurmbs("Login")["HashKey"][client][1] = ConfHash;
-            
-            string users_bar = Math.Floor((double)(Airtower.Clients.Count * 5 / 500)).ToString();
+
+            Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(
+                    String.Format("UPDATE `penguins` SET `LoginKey` = '{0}', `ConfirmationHash` = '{2}' WHERE `ID` = {1}",
+                    ConfHash, client.id, password));
+
+            string users_bar = Math.Floor((double)(Airtower.Clients.Values.Where(i => i.PORT == 9875).ToList().Count * 5 / 550)).ToString();
 
             client.send("l", 
                 string.Format("{0}|{1}|{2}|{3}|NULL|45|2", new object[] { client.id, penguin_details["SWID"],

@@ -12,6 +12,7 @@ namespace Times.Client.Dependencies
     using Server.Log;
     using Server.net;
     using Server.Utils;
+    using Server.Utils.MySQL;
 
     class LoginHandler : Dynamic
     {
@@ -66,21 +67,23 @@ namespace Times.Client.Dependencies
 
             if (Airtower.ServerType.ContainsKey(client.PORT))
             {
+                MySQLStatement statement = new MySQLStatement("SELECT `ID`, `Password`, `Email`, `SWID` FROM `Penguins` WHERE @col = @val");
+
                 if ((body.login.pword.ToString()).Contains("#") && Airtower.ServerType[client.PORT] == 0)
                 {
                     // World login 
-                    Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(
-                        String.Format("SELECT `ID`, `Password`, `Email`, `SWID` FROM `Penguins` WHERE `ID` = '{0}'", client.username.Split(char.Parse("|"))[0]),
-                        Server.Utils.Events.EventDelegate.create(this, "ContinueWorldLogin"), client, body);
+                    statement.parameters = new Dictionary<string, dynamic> { { "@col", "ID" }, { "@val", client.username.Split(char.Parse("|"))[0] } };
+                    Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(statement, Server.Utils.Events.EventDelegate.create(this, "ContinueWorldLogin"), client, body);
                 }
                 else
                 if (Airtower.ServerType[client.PORT] == -1)
                 {
                     // Primary login
-                    Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(
-                        String.Format("SELECT `ID`, `Password`, `Email`, `SWID` FROM `Penguins` WHERE `Username` = '{0}'", client.username),
-                        Server.Utils.Events.EventDelegate.create(this, "ContinuePrimaryLogin"), client, body);
+                    statement.parameters = new Dictionary<string, dynamic> { { "@col", "Username" }, { "@val", client.username} };
+                    Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(statement, Server.Utils.Events.EventDelegate.create(this, "ContinuePrimaryLogin"), client, body);
                 }
+
+                statement = null;
             }
         }
 
@@ -109,20 +112,22 @@ namespace Times.Client.Dependencies
 
             client.id = userInfo[0];
 
+            MySQLStatement stmt = new MySQLStatement("");
+
             AutoResetEvent banEvent = new AutoResetEvent(false);
-            Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(
-                    String.Format("SELECT `till` FROM `banned` WHERE `ID` = '{0}'", client.id),
-                    Server.Utils.Events.EventDelegate.create(this, "HandlePenguinBanned"), client, banEvent);
+
+            stmt.statement = "SELECT `till` FROM `banned` WHERE `ID` = @id";
+            stmt.parameters = new Dictionary<string, dynamic> { { "@id", client.id } };
+            Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(stmt, Server.Utils.Events.EventDelegate.create(this, "HandlePenguinBanned"), client, banEvent);
 
             banEvent.WaitOne();
 
             if (client.banned)
                 return;
 
-
-            Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(
-                String.Format("SELECT `ID`, `Username`, `Password`, `Email`, `SWID`, `LoginKey`, `ConfirmationHash` FROM `Penguins` WHERE `ID` = '{0}'", client.id),
-                Server.Utils.Events.EventDelegate.create(this, "CompleteLogin"), client, body);
+            stmt.statement = "SELECT `ID`, `Username`, `Password`, `Email`, `SWID`, `LoginKey`, `ConfirmationHash` FROM `Penguins` WHERE `ID` = @id";
+            Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(stmt, Server.Utils.Events.EventDelegate.create(this, "CompleteLogin"), client, body);
+            stmt = null;
         }
 
         public void CompleteLogin(MySqlDataReader reader, Penguin client, dynamic body)
@@ -177,10 +182,12 @@ namespace Times.Client.Dependencies
 
             client.id = penguin_details["ID"];
             // Handle Banned
+            MySQLStatement stmt = new MySQLStatement("");
+            stmt.parameters = new Dictionary<string, dynamic> { { "@id", client.id } };
             AutoResetEvent evnt = new AutoResetEvent(false);
-            Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(
-                    String.Format("SELECT `till` FROM `banned` WHERE `ID` = '{0}'", client.id),
-                    Server.Utils.Events.EventDelegate.create(this, "HandlePenguinBanned"), client, evnt);
+
+            stmt.statement = "SELECT `till` FROM `banned` WHERE `ID` = @id";
+            Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(stmt, Server.Utils.Events.EventDelegate.create(this, "HandlePenguinBanned"), client, evnt);
 
             evnt.WaitOne();
 
@@ -190,10 +197,12 @@ namespace Times.Client.Dependencies
             string ConfHash = GetPenguinRandomKey(client).md5() + "-" + penguin_details["Password"].GetHashCode().ToString().md5();
             Shell.getCurrentShell().getCurmbs("Login")["HashKey"][client][1] = ConfHash;
 
-            Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(
-                    String.Format("UPDATE `penguins` SET `LoginKey` = '{0}', `ConfirmationHash` = '{2}' WHERE `ID` = {1}",
-                    ConfHash, client.id, password));
+            stmt.statement = "UPDATE `penguins` SET `LoginKey` = @lk, `ConfirmationHash` = @ch WHERE `ID` = @id";
+            stmt.parameters["@lk"] = ConfHash;
+            stmt.parameters["@ch"] = password;
 
+            Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(stmt);
+            
             string users_bar = Math.Floor((double)(Airtower.Clients.Values.Where(i => i.PORT == 9875).ToList().Count * 5 / 550)).ToString();
 
             client.send("l", 
@@ -226,8 +235,8 @@ namespace Times.Client.Dependencies
             } else
             {
                 client.banned = false;
-                Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(
-                    String.Format("UPDATE `banned` SET `till` = '0' AND `b_by`='' AND `reason`='' WHERE `ID` = {0}", client.id));
+                MySQLStatement stmt = new MySQLStatement("UPDATE `banned` SET `till` = '0' AND `b_by`='' AND `reason`='' WHERE `ID` = @id", new Dictionary<string, dynamic> { { "@id", client.id } });
+                Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(stmt);
             }
 
             evnt.Set();

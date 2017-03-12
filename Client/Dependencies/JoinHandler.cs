@@ -33,8 +33,10 @@ namespace Times.Client.Dependencies
                 return;
             }
 
-            string confirmationHash = (MySQL.getCurrentMySQLObject().ExecuteAndFetch(
-                String.Format("SELECT `ConfirmationHash` FROM `penguins` WHERE `ID` = '{0}'", client.id))).GetDictFromReader()["ConfirmationHash"];
+            MySQLStatement stmt = new MySQLStatement("SELECT `ConfirmationHash` FROM `penguins` WHERE `ID` = @id", new Dictionary<string, dynamic> { { "@id", client.id } });
+            string confirmationHash = (MySQL.getCurrentMySQLObject().ExecuteAndFetch(stmt).GetDictFromReader())["ConfirmationHash"];
+
+            stmt = null;
 
             if (hash != confirmationHash)
             {

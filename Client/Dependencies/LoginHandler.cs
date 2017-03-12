@@ -67,19 +67,21 @@ namespace Times.Client.Dependencies
 
             if (Airtower.ServerType.ContainsKey(client.PORT))
             {
-                MySQLStatement statement = new MySQLStatement("SELECT `ID`, `Password`, `Email`, `SWID` FROM `Penguins` WHERE @col = @val");
+                MySQLStatement statement = new MySQLStatement();
 
                 if ((body.login.pword.ToString()).Contains("#") && Airtower.ServerType[client.PORT] == 0)
                 {
                     // World login 
-                    statement.parameters = new Dictionary<string, dynamic> { { "@col", "ID" }, { "@val", client.username.Split(char.Parse("|"))[0] } };
+                    statement.statement = "SELECT `ID`, `Password`, `Email`, `SWID` FROM `Penguins` WHERE `ID` = @val";
+                    statement.parameters = new Dictionary<string, dynamic> { { "@val", client.username.Split(char.Parse("|"))[0] } };
                     Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(statement, Server.Utils.Events.EventDelegate.create(this, "ContinueWorldLogin"), client, body);
                 }
                 else
                 if (Airtower.ServerType[client.PORT] == -1)
                 {
                     // Primary login
-                    statement.parameters = new Dictionary<string, dynamic> { { "@col", "Username" }, { "@val", client.username} };
+                    statement.statement = "SELECT `ID`, `Password`, `Email`, `SWID` FROM `Penguins` WHERE `Username` = @val";
+                    statement.parameters = new Dictionary<string, dynamic> { { "@val", client.username} };
                     Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(statement, Server.Utils.Events.EventDelegate.create(this, "ContinuePrimaryLogin"), client, body);
                 }
 

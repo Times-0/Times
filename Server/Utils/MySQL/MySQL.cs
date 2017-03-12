@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +12,18 @@ namespace Times.Server.Utils.MySQL
     using Server.net;
 
     using MySql.Data.MySqlClient;
+
+    class MySQLStatement
+    {
+        public string statement = "";
+        public Dictionary<string, dynamic> parameters = null;
+
+        public MySQLStatement(string query, Dictionary<string, dynamic> parameters = null)
+        {
+            this.statement = query;
+            this.parameters = parameters;
+        }
+    }
 
     class MySQLHandler
     {
@@ -35,7 +47,7 @@ namespace Times.Server.Utils.MySQL
         }
 
         public MySqlConnection conn = null;
-        public string query = null;
+        public MySQLStatement query;
         public long lastInsertID;
 
         public MySQLHandler(MySqlConnection connection)
@@ -43,7 +55,7 @@ namespace Times.Server.Utils.MySQL
             this.conn = connection;
         }
 
-        public void start(string query)
+        public void start(MySQLStatement query)
         {
             this.query = query;
             this.available = false;
@@ -52,8 +64,15 @@ namespace Times.Server.Utils.MySQL
         public async void Execute()
         {
             this.conn.Close();
+            string query = this.query.statement;
 
-            MySqlCommand command = new MySqlCommand(this.query, this.conn);
+            MySqlCommand command = new MySqlCommand(query, this.conn);
+            foreach(KeyValuePair<string, dynamic> Param  in this.query.parameters)
+            {
+                command.Parameters.AddWithValue(Param.Key, Param.Value);
+            }
+            command.Prepare();
+
             await this.conn.OpenAsync();
 
             var reader = await command.ExecuteNonQueryAsync();
@@ -64,8 +83,15 @@ namespace Times.Server.Utils.MySQL
         public async void ExecuteAndFetch(Delegate callback, params object[] args)
         {
             this.conn.Close();
+            string query = this.query.statement;
 
-            MySqlCommand command = new MySqlCommand(this.query, this.conn);
+            MySqlCommand command = new MySqlCommand(query, this.conn);
+            foreach (KeyValuePair<string, dynamic> Param in this.query.parameters)
+            {
+                command.Parameters.AddWithValue(Param.Key, Param.Value);
+            }
+            command.Prepare();
+
             this.conn.Open();
 
             var reader = await command.ExecuteReaderAsync();
@@ -125,7 +151,7 @@ namespace Times.Server.Utils.MySQL
             }
         }
 
-        public MySqlDataReader ExecuteAndFetch(string query)
+        public MySqlDataReader ExecuteAndFetch(MySQLStatement query)
         {
             AutoResetEvent aev = new AutoResetEvent(false);
             MySqlDataReader toreturn = null;
@@ -146,9 +172,9 @@ namespace Times.Server.Utils.MySQL
             return toreturn;            
         }
 
-        public void MySQLCallback(string query, Delegate delg = null, params object[] args)
+        public void MySQLCallback(MySQLStatement query, Delegate delg = null, params object[] args)
         {
-            if (query == "" || query == null) return;
+            if (query.statement == "" || query.statement == null || query == null) return;
 
             this.waitingCallback.Add(new List<dynamic> { query, delg, args });
             this.NextCallback();

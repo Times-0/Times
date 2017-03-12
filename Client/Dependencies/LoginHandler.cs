@@ -72,8 +72,8 @@ namespace Times.Client.Dependencies
             if (Airtower.ServerType == -1)
             {
                 // Primary login
-                MySQLStatement statement = new MySQLStatement("SELECT `ID`, `Password`, `Email`, `SWID` FROM `Penguins` WHERE @col = @val",
-                    new Dictionary<string, dynamic> { { "@col", "ID" }, { "@val", client.username.Split(char.Parse("|"))[0] } });
+                MySQLStatement statement = new MySQLStatement("SELECT `ID`, `Password`, `Email`, `SWID` FROM `Penguins` WHERE `ID` = @val",
+                    new Dictionary<string, dynamic> { { "@val", client.username.Split(char.Parse("|"))[0] } });
                 Server.Utils.MySQL.MySQL.getCurrentMySQLObject().MySQLCallback(statement, 
                     Server.Utils.Events.EventDelegate.create(this, "ContinuePrimaryLogin"), client, body);
             }

@@ -16,12 +16,14 @@ namespace Times.Server.Utils.MySQL
     class MySQLStatement
     {
         public string statement = "";
-        public Dictionary<string, dynamic> parameters = null;
+        public Dictionary<string, dynamic> parameters = new Dictionary<string, dynamic> { };
 
         public MySQLStatement(string query, Dictionary<string, dynamic> parameters = null)
         {
             this.statement = query;
-            this.parameters = parameters;
+            
+            if (!parameters == null)
+                this.parameters = parameters;
         }
     }
 

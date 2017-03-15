@@ -1,5 +1,6 @@
-## Times - Server ##
+## Times - Server [World] ##
 An C# Event driven, multi threaded AS3 CPPS Emulator.
+This is world/game server, check other branches for other types of server.
 
 THIS IS FOR THE LOGIN SERVER. View more branches for different types of server.
 

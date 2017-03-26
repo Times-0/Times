@@ -40,13 +40,13 @@ You no need to import the classes that handles callback. All you need to do is, 
 ## STARTING THE SERVER ##
 First of all you have to do this to init a server.
 ```
-var loginServer = new Airtower("IP/HOST NAME", port);
+var worldServer = new Airtower("IP/HOST NAME", port);
 var Shell = new Shell();
 ```
 
 Next, do all the remaining stuffs you need to setup before you start the server. Then atlast, to start the server execute.
 ```
-loginServer.startConnection();
+worldServer.startConnection();
 ```
 
 ## CONTRIBUTION ##

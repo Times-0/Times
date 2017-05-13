@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +14,8 @@ namespace Times.Client
 
     class Shell : Dynamic
     {
+		public Dictionary<string, object> DEPENDENCIES;
+		
         public static bool IsWorldServer = false;
         public static bool IsLoginServer = false;
         // TODO : Recognize Redeem server.
@@ -37,6 +39,8 @@ namespace Times.Client
 
         protected void InitHandlers()
         {
+			this.DEPENDENCIES = new Dictionary<string, object> { };
+			
             Server.Log.Debugger.CallEvent(Server.net.Airtower.INFO_EVENT, "Loading server dependencies...");
             Assembly CurrentAssembly = Assembly.GetExecutingAssembly();
             string Namespace = "Times.Client.Dependencies"; // Change if if you mean to change the name space of the class
@@ -50,6 +54,14 @@ namespace Times.Client
                 try
                 {
                     var Class = Activator.CreateInstance(Dependencies[_loc1_]);
+					string linkage_name;
+
+                    if (Dependencies[_loc1_].GetProperty("CLASS_LINKAGE_NAME") != null)
+                        linkage_name = ((dynamic)Class).CLASS_LINKAGE_NAME;
+                    else
+                        linkage_name = Dependencies[_loc1_].Name;
+
+                    this.DEPENDENCIES[linkage_name] = Class;
                 }
                 catch (Exception Excep)
                 {

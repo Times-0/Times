@@ -43,15 +43,7 @@ namespace Times.Client.Base
         {
             if (!this.ItemExists(item.id))
                 this.items.Add(item);
-        }
-
-        public void Add(int item)
-        {
-            var Cache = (CacheHandler)Shell.getCurrentShell().DEPENDENCIES[CacheHandler.CLASS_LINKAGE_NAME];
-
-            if (!this.ItemExists(item))
-                this.items.Add(Cache.GetItem(item)[0]);
-
+            
             if (this.penguin == null) return;
 
             string Items = this.Join("%");
@@ -61,6 +53,14 @@ namespace Times.Client.Base
             statement.parameters["@id"] = this.penguin.id;
 
             MySQL.getCurrentMySQLObject().MySQLCallback(statement);
+        }
+
+        public void Add(int item)
+        {
+            var Cache = (CacheHandler)Shell.getCurrentShell().DEPENDENCIES[CacheHandler.CLASS_LINKAGE_NAME];
+
+            if (!this.ItemExists(item))
+                this.items.Add(Cache.GetItem(item)[0]);
         }
 
         public void Add(string item)

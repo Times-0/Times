@@ -19,7 +19,7 @@ namespace Times.Client.Dependencies
     {
         public static string CLASS_LINKAGE_NAME = "CACHE";
         
-        public static Dictionary<string, Dictionary<string, dynamic>> AvailablePenguinItems = new Dictionary<string, Dictionary<string, dynamic>> { };
+        public static Dictionary<int, Item> AvailablePenguinItems = new Dictionary<int, Item> { };
         public static Dictionary<string, BaseRoom> Rooms = new Dictionary<string, BaseRoom> { };
 
         public CacheHandler()
@@ -96,16 +96,69 @@ namespace Times.Client.Dependencies
             for (var i  = 0; i < ClothDetails.Count; i++)
             {
                 Dictionary<string, string> cloth = ClothDetails[i];
-                AvailablePenguinItems[cloth["paper_item_id"]] = new Dictionary<string, dynamic> { { "type", cloth["type"] } };
+                Item item = new Item(cloth);
 
-                AvailablePenguinItems[cloth["paper_item_id"]]["cost"] = cloth["cost"];
-                AvailablePenguinItems[cloth["paper_item_id"]]["member"] = Boolean.Parse(cloth["is_member"]);
-                AvailablePenguinItems[cloth["paper_item_id"]]["name"] = (cloth["label"]).ToString();
-                AvailablePenguinItems[cloth["paper_item_id"]]["epf"] = false;
-
-                if (cloth.ContainsKey("is_epf"))
-                    AvailablePenguinItems[cloth["paper_item_id"]]["epf"] = cloth["is_epf"] == "1" ? true : false;
+                AvailablePenguinItems[item.id] = item;
             }
+        }
+
+        public List<Item> GetItem(dynamic item, string key = "id")
+        {
+            List<Item> Items = new List<Item> { };
+
+            key = key.ToLower();
+            var Keys = AvailablePenguinItems.Keys.ToList();
+            for (int i = 0; i < Keys.Count; i++)
+            {
+                var _item = AvailablePenguinItems[Keys[i]];
+                if (key == "id" && int.Equals(_item.id, item))
+                    Items.Add(_item);
+                else if (key == "type" && int.Equals(_item.id, item))
+                    Items.Add(_item);
+                else if (key == "cost" && int.Equals(_item.id, item))
+                    Items.Add(_item);
+                else if (key == "member" && bool.Equals(_item.member, item))
+                    Items.Add(_item);
+                else if (key == "name" && string.Equals(_item.name, item))
+                    Items.Add(_item);
+                else if (key == "display" && string.Equals(_item.display, item))
+                    Items.Add(_item);
+                else if (key == "epf" && bool.Equals(_item.epf, item))
+                    Items.Add(_item);
+                else if (key == "layer" && int.Equals(_item.layer, item))
+                    Items.Add(_item);
+                else if (key == "bait" && bool.Equals(_item.bait, item))
+                    Items.Add(_item);
+            }
+               
+            return Items;
+        }
+
+        public bool ItemExists(int item)
+        {
+            return this.GetItem(item).Count > 0;
+        }
+
+        public bool ItemExists(string item)
+        {
+            int _item;
+
+            if (!int.TryParse(item, out _item))
+                return false;
+
+            return this.ItemExists(_item);
+        }
+
+        public List<Item> FilterItemsByType(List<int> items, int type)
+        {
+            List<Item> FilteredItems = new List<Item> { };
+            Item item;
+
+            for (int i = 0; i < items.Count; i++)
+                if ((item = this.GetItem(i)[0]).type == type)
+                    FilteredItems.Add(item);
+
+            return FilteredItems;          
         }
     }
 }

@@ -16,7 +16,8 @@ namespace Times.Client.Dependencies
 
     class JoinHandler
     {
-
+        public static string CLASS_LINKAGE_NAME = "JOIN-H";        
+        
         public JoinHandler()
         {
             this.AddXTHandler("s", "j#js", "JoinPenguinToServer");

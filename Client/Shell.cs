@@ -14,7 +14,7 @@ namespace Times.Client
 
     class Shell : Dynamic
     {
-		public Dictionary<string, object> DEPENDENCIES;
+        public Dictionary<string, object> DEPENDENCIES;
 		
         public static bool IsWorldServer = false;
         public static bool IsLoginServer = false;
@@ -54,7 +54,7 @@ namespace Times.Client
                 try
                 {
                     var Class = Activator.CreateInstance(Dependencies[_loc1_]);
-					string linkage_name;
+                    string linkage_name;
 
                     if (Dependencies[_loc1_].GetProperty("CLASS_LINKAGE_NAME") != null)
                         linkage_name = ((dynamic)Class).CLASS_LINKAGE_NAME;

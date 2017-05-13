@@ -17,7 +17,8 @@ namespace Times.Client.Dependencies
 
     class CacheHandler
     {
-
+        public static string CLASS_LINKAGE_NAME = "CACHE";
+        
         public static Dictionary<string, Dictionary<string, dynamic>> AvailablePenguinItems = new Dictionary<string, Dictionary<string, dynamic>> { };
         public static Dictionary<string, BaseRoom> Rooms = new Dictionary<string, BaseRoom> { };
 

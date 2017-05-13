@@ -16,7 +16,8 @@ namespace Times.Client.Dependencies
 
     class LoginHandler : Dynamic
     {
-
+        public static string CLASS_LINKAGE_NAME = "LOGIN";
+        
         public LoginHandler()
         {
             this.AddXMLHandler("verChk", "ClientAPIVersionCheck");

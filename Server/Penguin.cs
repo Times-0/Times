@@ -27,6 +27,7 @@ namespace Times.Server
         public int age = 0, membershipDays = 0, coins = 0, RegistrationDate = 0;
         public List<string> epf = new List<string> { };
         public List<string> stamps = new List<string> { };
+        public Inventory inventory;
 
         public Dictionary<string, string> Cache = new Dictionary<string, string> { };
 
@@ -87,7 +88,7 @@ namespace Times.Server
             fetchEvent.WaitOne();
 
             MySQL.getCurrentMySQLObject().MySQLCallback(String.Format(
-           "SELECT `Avatar`, `AvatarAttributes`, `RegistrationDate`, `Moderator`, `Coins`, `Stamps`, `EPF` FROM `Penguins` WHERE `ID` = '{0}'"
+           "SELECT `Avatar`, `AvatarAttributes`, `RegistrationDate`, `Moderator`, `Coins`, `Stamps`, `EPF`, `Inventory` FROM `Penguins` WHERE `ID` = '{0}'"
            , this.id), Utils.Events.EventDelegate.create(this, "FetchPenguinDetails"), fetchEvent);
 
             fetchEvent.WaitOne();
@@ -137,6 +138,7 @@ namespace Times.Server
             this.RegistrationDate = int.Parse(details["RegistrationDate"]);
             this.moderator = bool.Parse(details["Moderator"]);
             this.epf = details["EPF"].Split(',').ToList();
+            this.inventory = new Inventory(details["Inventory"], "%", this);
 
             long one_day = 24 * 60 * 60;
             long currentTmsp = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;

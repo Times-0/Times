@@ -2,7 +2,6 @@
 An C# Event driven, multi threaded AS3 CPPS Emulator.
 This is world/game server, check other branches for other types of server.
 
-**Anyone except _Zaseth_ can use this source**
 
 THIS IS FOR THE WORLD SERVER. View more branches for different types of server.
 
